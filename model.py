@@ -6,9 +6,10 @@ from sklearn.metrics import accuracy_score  # Will be used while calculating acc
 class Convolutional_Neural_Network(nn.Module):
     def __init__(self, activation_function, dropout_rate):
         """
-
-        :param activation_function:
-        :param dropout_rate:
+        CNN Class with 2 convolutional layers (and 2 2x2 max-pooling after each layer),
+        followed by a 2 fully connected linear layers with 256 hidden neurons and 10 output neurons.
+        :param activation_function: Which activation function to use (ReLU, ELU, Sigmoid or Tanh)
+        :param dropout_rate: Dropout rate
         """
         super(Convolutional_Neural_Network, self).__init__()  # Call the base constructor first!
         # CNN
@@ -44,6 +45,11 @@ class Convolutional_Neural_Network(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
+        """
+        Forward propagation
+        :param x:  X is the input batch
+        :return: returns outputs
+        """
         # Getting the batch size to use in reshaping
         batch_size = x.shape[0]
         # Transform the tensor shape to fit
@@ -62,12 +68,34 @@ class Convolutional_Neural_Network(nn.Module):
 
 
 def weights_init(m):
+    """
+    Function for initialising weights with Xavier
+    :param m: model
+    """
     if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         # Weights initialised with Xavier
         torch.nn.init.xavier_uniform_(m.weight)
 
 
 def train(train_loader, test_loader, activation_function, learning_rate, dropout_rate, device):
+    """
+    Function for training and testing.
+    Algorithm
+        1. Initialising of CNN, loss function, optimizer and necessary lists
+        2. For each epoch
+            3. For each batch in training loader
+                - Performing forward and backward propagations, classifying inputs, calculating accuracy and loss values
+            4. For each batch in test loader
+                - Performing forward propagation, classifying inputs, calculating accuracy and loss values
+
+    :param train_loader: Includes training batches
+    :param test_loader: Includes test batches
+    :param activation_function: Which activation function to use (ReLU, ELU, Sigmoid or Tanh)
+    :param learning_rate: Learning rate
+    :param dropout_rate: Dropout rate
+    :param device: Which device to use, GPU or CPU
+    :return: Created model and loss and accuracy lists for training and test
+    """
     # Instance of CNN created with specified activation function and dropout rate
     model = Convolutional_Neural_Network(activation_function, dropout_rate)
     # Weights initialised with Xavier
@@ -152,4 +180,4 @@ def train(train_loader, test_loader, activation_function, learning_rate, dropout
         # Append accuracy to a list to use it in visualisation afterwards
         test_epoch_accuracy.append(test_accuracy)
     # Return created model and loss and accuracy lists for training and test
-    return model, train_epoch_loss, train_epoch_accuracy, test_epoch_loss, test_epoch_accuracy
+    return model, train_epoch_accuracy, train_epoch_loss, test_epoch_accuracy, test_epoch_loss

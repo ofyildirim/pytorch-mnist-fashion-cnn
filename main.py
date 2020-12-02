@@ -1,46 +1,26 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
-import numpy as np
-import matplotlib.pyplot as plt
 from model import *
-
+from create_plots import *
+# Training set imported
 train_set = torchvision.datasets.FashionMNIST(root=".", train=True, download=True, transform=transforms.ToTensor())
-
+# Test set imported
 test_set = torchvision.datasets.FashionMNIST(root=".", train=False, download=True, transform=transforms.ToTensor())
-
-training_loader = torch.utils.data.DataLoader(train_set, batch_size=32, shuffle=False)
-
+# Train loader created with 32 batch size
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=32, shuffle=False)
+# Test loader created with 32 batch size
 test_loader = torch.utils.data.DataLoader(test_set, batch_size=32, shuffle=False)
-
+# Manual seed used will return deterministic random numbers
 torch.manual_seed(0)
 # If you are using CuDNN , otherwise you can just ignore
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
+# Device decision made, GPU or CPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model, train_epoch_loss, train_epoch_accuracy, test_epoch_loss, test_epoch_accuracy = train(training_loader,
-                                                                                            test_loader, 'relu', 0.1, 0,
-                                                                                            device)
 
-plt.plot(np.array(train_epoch_accuracy) * 100, label='Training Accuracy')
-plt.plot(np.array(test_epoch_accuracy) * 100, label='Test Accuracy')
-plt.xlabel('Number of Epochs')
-# Set the y axis label of the current axis.
-plt.ylabel('Accuracy')
-# Set a title of the current axes.
-plt.title('Accuracies')
-# show a legend on the plot
-plt.legend()
-plt.savefig('ReLU_Activation_Accuracies.png')
+# Activation function = ReLU, learning rate = 0.1, dropout rate = 0
+model, train_accuracy, train_loss, test_accuracy, test_loss = train(train_loader, test_loader, 'relu', 0.1, 0, device)
 
-plt.plot(train_epoch_loss, label='Training Loss')
-plt.plot(test_epoch_loss, label='Test Loss')
-plt.xlabel('Number of Epochs')
-# Set the y axis label of the current axis.
-plt.ylabel('Loss')
-# Set a title of the current axes.
-plt.title('Losses')
-# show a legend on the plot
-plt.legend()
-plt.savefig('ReLU_Activation_Losses.png')
+create_plots(train_accuracy, train_loss, test_accuracy, test_loss)
